@@ -82,4 +82,16 @@ class Delivery{
 
         return $result['orderId'] ?? null;
     }
+
+    public function getOrderDetails($orderId){
+        $query = "SELECT address, delLongitude, delLatitude, date FROM orders WHERE orderId = :orderId";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':orderId', $orderId);
+
+        if ($stmt->execute()){
+            return $stmt->fetch(PDO::FETCH_ASSOC);
+        }
+        
+        return null;
+    }
 }
