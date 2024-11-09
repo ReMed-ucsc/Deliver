@@ -1,25 +1,22 @@
 <?php
+header("Content-Type: application/json");
+include_once 'controllers/AuthController.php';
 
-if(!empty($_POST['name']) && !empty($_POST['password']) && !empty($_POST['email'])){
+$auth = new AuthController();
+$data = json_decode(file_get_contents("php://input"), true);
 
-    $name = $_POST['name'];
-    $email = $_POST['email'];
-    $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
+if(!$data){
+    echo json_encode(["error" => "Request error", "raw_input" => file_get_contents("php://input")]);
+    exit;
+}else
 
+$result = $auth->register($data);
 
-    $con = mysqli_connect("192.168.1.20:3306", "admin", "root", "test");
-    
-    if($con){
-        $sql = "INSERT INTO users (name, email, password) VALUES ('".$name."', '".$email."', '".$password."')";
-
-        if(mysqli_query($conn, $sql)){
-            echo "success";
-        }else{
-            echo "false";
-        }
-    }else 
-        echo "database not connected";
-
+if($result["status"] != "error"){
+    echo json_encode(["message" => "User regsitered successfully"]);
 }else{
-    echo "All filed are required";
+    echo json_encode([
+        "message" => "User registration failed",
+        "error" => $result["message"]
+    ]);
 }

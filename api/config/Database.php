@@ -1,9 +1,9 @@
 <?php
 class Database{
-    private $host = '192.168.1.20:3306';
+    private $host = '192.168.1.20';
     private $db_name = 'test';
-    private $username = 'admin';
-    private $password = 'root';
+    private $username = 'hiruna';
+    private $password = 'password';
     public $conn;
 
     public function connect(){
@@ -18,3 +18,6 @@ class Database{
         return $this->conn;
     }
 }
+
+//uses PDO (php data objetc) database connection
+//return new instance every time requested
