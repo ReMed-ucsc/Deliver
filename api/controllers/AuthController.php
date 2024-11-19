@@ -31,18 +31,21 @@ class AuthController {
     }
 
     public function login($data){
-        $this->user->email = $data->email;
-        $this->user->password = $data->password;
+        if(!empty($data['email']) && !empty($data['password']) && !empty($data['fcmToken'])){
+            $this->user->email = $data['email'];
+            $this->user->password = $data['password'];
+            $this->user->fcmToken = $data['fcmToken'];
 
-        $userDetails = $this->user->login();
+            $userDetails = $this->user->login();
 
-        if($userDetails){
-            $token = JWTHandler::encode(['$id' => $userDetails['id']]);
-            return [
-                'token' => $token,
-                'apiKey' => $userDetails['api_key'],
-                'id' => $userDetails['id']
-            ];
+            if($userDetails){
+                $token = JWTHandler::encode(['$id' => $userDetails['id']]);
+                return [
+                    'token' => $token,
+                    'apiKey' => $userDetails['api_key'],
+                    'id' => $userDetails['id']
+                ];
+            }
         }
         return null;
     }
