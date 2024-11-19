@@ -6,41 +6,59 @@ $commentController = new CommentController();
 
 $requestMethod = $_SERVER['REQUEST_METHOD'];
 $requestUri = $_SERVER['REQUEST_URI'];
+$response = "";
 
-$path = str_replace('api/comment', '', $requestUri);
+$path = str_replace('/api/comment', '', parse_url($requestUri, PHP_URL_PATH));
 
 $inputData = json_decode(file_get_contents('php://input'), true) ?: $_REQUEST;
 
-if($requestMethod === 'POST') {
-    if($path === '/add') {
-        $reponse = $commentController->addNewComment($inputData);
+if ($requestMethod === 'POST') {
+    if ($path === '/add') {
+        $response = $commentController->addNewComment($inputData);
     } elseif ($path === '/update') {
-        $reponse = $commentController->updateExistingComment($inputData);
-    } elseif ($path == '/delete') {
-        $reponse = $commentController->deleteExistingComment($inputData);
+        $response = $commentController->updateExistingComment($inputData);
+    } elseif ($path === '/delete') {
+        $response = $commentController->deleteExistingComment($inputData);
+    } else {
+        $response = [
+            "status" => "error",
+            "message" => "Invalid POST endpoint"
+        ];
     }
-} elseif ($requestMethod == 'GET') {
+} elseif ($requestMethod === 'GET') {
     if ($path === '/get') {
-        if(isset($_GET['driverId'])) {
+        if (isset($_GET['driverId'])) {
             $driverId = $_GET['driverId'];
-            $reponse = $commentController->getCommentsOfDriver(['driverId' => $driverId]);
-        }else{
-            $reponse = [
+            $response = $commentController->getCommentsOfDriver(['driverId' => $driverId]);
+        } else {
+            $response = [
                 "status" => "error",
-                "message" => "driverId id required"
+                "message" => "driverId is required"
             ];
         }
+    } else if($path === '/getone') {
+        if(isset($_GET['commentId'])){
+            $commentId = $_GET['commentId'];
+            $response = $commentController->getOneComment(['commentId' => $commentId]);
+        } else {
+            $response = [
+                "status" => "error",
+                "message" => "commentId is required"
+            ];
+        }
+
+    }else {
+        $response = [
+            "status" => "error",
+            "message" => "Invalid GET endpoint"
+        ];
     }
-    $reponse = [
+} else {
+    $response = [
         "status" => "error",
-        "message" => "invalid endpoint"
-    ];
-} else{
-    $reponse = [
-        "status" => "error",
-        "message" => "request method invalid"
+        "message" => "Invalid request method"
     ];
 }
 
-header('content-Type: application/json');
-echo json_encode($reponse);
+header('Content-Type: application/json');
+echo json_encode($response);
